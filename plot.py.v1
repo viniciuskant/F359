@@ -1,0 +1,101 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import time
+
+# Parâmetros de configuração
+VOLUME_RECEPIENTE = 100  # Volume do recipiente em mL
+ESCALA_TENSÃO = 1  # Escala para tensão V
+ESCALA_CORRENTE = 0.001  # Escala para corrente mA
+ESCALA_SAL = 1  # Escala para sal g
+
+# Parâmetros adicionais para cálculo de resistividade
+LARGURA = 0.01  # Largura do recipiente em metros
+ALTURA = 0.01  # Altura do recipiente em metros
+DISTANCIA = 0.1  # Distância entre os eletrodos em metros
+
+# Calcular área da seção transversal
+area = LARGURA * ALTURA
+
+# Função para calcular resistência
+def calcular_resistencia(tensao, corrente):
+    if corrente == 0:
+        return float('inf')  # Evitar divisão por zero
+    return tensao / corrente
+
+# Inicializar listas para armazenar os dados
+tensoes = []
+correntes = []
+sais = []
+resistencias = []
+concentracoes = []
+
+# Ativar modo interativo do Matplotlib
+plt.ion()
+
+# Configurar figura e eixos uma vez
+fig, axs = plt.subplots(2, 1, figsize=(10, 12))
+
+try:
+    while True:
+        # Ler o arquivo CSV
+        df = pd.read_csv('dados.csv')  # Ajuste o nome do arquivo conforme necessário
+
+        # Limpar listas para armazenar os dados atuais
+        tensoes.clear()
+        correntes.clear()
+        sais.clear()
+        resistencias.clear()
+        concentracoes.clear()
+
+        total_sal = 0
+        for index, row in df.iterrows():
+            tensao = row['tensao'] * ESCALA_TENSÃO
+            corrente = row['corrente'] * ESCALA_CORRENTE
+            sal = row['sal'] * ESCALA_SAL
+
+            # Calcular resistência
+            resistencia = calcular_resistencia(tensao, corrente)
+            
+            # Calcular total de sal adicionado (em g)
+            total_sal += sal
+            
+            # Calcular concentração em g/mL
+            concentracao = total_sal / VOLUME_RECEPIENTE
+            
+            # Armazenar os dados
+            tensoes.append(tensao)
+            correntes.append(corrente)
+            sais.append(sal)
+            resistencias.append(resistencia)
+            concentracoes.append(concentracao)
+
+        # Calcular resistividade
+        resistividades = [resistencia * area / DISTANCIA for resistencia in resistencias]
+
+        # Limpar os gráficos anteriores
+        axs[0].cla()
+        axs[1].cla()
+
+        # Plotar gráfico de Resistência vs Concentração
+        axs[0].scatter(concentracoes, resistencias, label='Resistência vs Concentração', color='purple')
+        axs[0].plot(concentracoes, resistencias, color='purple')  # Adicionar linha
+        axs[0].set_title('Resistência vs Concentração de Sal')
+        axs[0].set_xlabel('Concentração (g/mL)')
+        axs[0].set_ylabel('Resistência (Ohms)')
+        axs[0].legend()
+
+        # Plotar gráfico de Resistividade vs Concentração
+        axs[1].scatter(concentracoes, resistividades, label='Resistividade vs Concentração', color='blue')
+        axs[1].plot(concentracoes, resistividades, color='blue')  # Adicionar linha
+        axs[1].set_title('Resistividade vs Concentração de Sal')
+        axs[1].set_xlabel('Concentração (g/mL)')
+        axs[1].set_ylabel('Resistividade (Ohm·m)')
+        axs[1].legend()
+
+        plt.tight_layout()
+        plt.pause(1)  # Pausar por 1 segundo antes da próxima atualização
+
+except KeyboardInterrupt:
+    print("Programa interrompido.")
+except Exception as e:
+    print(f"Erro: {e}")
