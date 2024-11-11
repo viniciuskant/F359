@@ -17,6 +17,10 @@ Este projeto usa Python para ler dados de um arquivo CSV, calcular a resistênci
 - `incerteza_resistencia(tensao, corrente)`: Calcula a incerteza associada à resistência.
 - `plotar_grafico_resistencia_concentracao(save=False)`: Plota os gráficos de Resistência e Resistividade vs Concentração.
 
+## Notação dos Dados
+
+Os dados coletados nos experimentos seguem a notação `dados-dia-mes-numero_da_coleta.csv`. O arquivo principal de dados que o programa lê é `dados.csv`, que contém as medições de tensão, corrente e área da seção transversal para diferentes concentrações de solução salina. Certifique-se de que o arquivo `dados.csv` esteja no diretório correto para que o programa possa acessá-lo e processar as informações corretamente.
+
 ## Requisitos
 ### Configuração do Ambiente Virtual
 
